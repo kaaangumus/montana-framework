@@ -1,97 +1,131 @@
-# Montana Framework
+# Montana
 
----
+Montana is a local exploit metadata search tool inspired by `searchsploit`.
 
-*"A lightweight and modular exploit framework for researchers and developers."*
+It searches `index.json` and prints matching exploit records. It does not ship exploit source files, payloads, or proof-of-concept code.
 
----
+## Why This Changed
 
-Montana is an interactive framework designed to manage and utilize a local collection of exploits, inspired by the structure of the `0day.today` archive. It allows for rapid searching, analysis, and deployment of security proofs-of-concept.
+Older versions bundled an `exploits/` directory with thousands of exploit files. That made the repository heavy and could trigger antivirus products such as Windows Defender as HackTool or malware content.
+
+The current version keeps only searchable metadata:
+
+- ID
+- Title
+- CVE
+- Platform
+- Category
+- Author
+- Date
+- Original source link
 
 ## Features
 
-- **Interactive Shell:** An easy-to-use command-line interface with contextual prompts.
-- **Exploit Database:** Automatically loads and indexes exploits from a user-provided `index.json` file.
-- **Advanced Search:** Quickly find exploits by keyword, searching across titles, platforms, authors, and CVEs.
-- **Nmap Integration:** Launch Nmap scans directly from the framework.
-- **Smart Suggestions:** Get automatic exploit recommendations based on the results of your Nmap scans.
-- **Easy Export:** Save any exploit's content to a file for external use with the `save` command.
-
-## Project Structure
-
-The project is organized as follows:
-
-```
-.
-├── exploits/               # Directory for exploit files
-├── go.mod
-├── go.sum
-├── index.json              # Exploit index file
-├── install.sh              # Installation script
-├── main.go                 # Main application source code
-└── README.md
-```
+- Fast local search over `index.json`
+- Keyword search
+- CVE search
+- Platform and category filters
+- Detail view by exploit ID
+- No bundled exploit code
+- No shell mode
+- No exploit export or copy feature
 
 ## Installation
 
-To install the Montana Framework on your system and make it accessible from anywhere in your terminal, follow these steps:
+Requirements:
 
-1.  **Prerequisites:**
-    - **Go:** Version 1.18 or higher.
-    - **Nmap:** Must be installed and in your system's PATH.
+- Go 1.20+
 
-2.  **Clone the repository (if you haven't already):**
-    ```bash
-    git clone https://github.com/your-username/montana-framework.git
-    cd montana-framework
-    ```
+Build locally:
 
-3.  **Run the installer:**
-    The `install.sh` script will build the binary, and copy it to `/usr/local/bin`. It will also copy the `exploits` directory and `index.json` to `/usr/local/share/montana-framework`.
+```bash
+go build -o montana .
+```
 
-    **Important:** You need to run the script with `sudo` because it writes to system directories.
+Run from the repository:
 
-    ```bash
-    chmod +x install.sh
-    sudo ./install.sh
-    ```
+```bash
+./montana -q "wordpress rce"
+```
 
-4.  **Run the application:**
-    Once the installation is complete, you can run the framework from anywhere in your terminal:
-    ```bash
-    montana-framework
-    ```
+Install on Linux:
+
+```bash
+chmod +x install.sh
+sudo ./install.sh
+```
+
+The installer copies the binary to `/usr/local/bin/montana` and `index.json` to `/usr/local/share/montana/index.json`.
 
 ## Usage
 
-### Main Commands
-
-- `search <keyword(s)>`: Search for exploits. 
-  - *Example:* `search wordpress 5.2`
-- `list`: Interactively lists exploits. It first prompts for a category and then displays the filtered results in a scrollable view.
-  - *Example:* Type `list`, then enter a category like `web-applications` or `all`.
-- `use <ID>`: Select an exploit to interact with. The prompt will change to show the active exploit.
-  - *Example:* `use 33814`
-- `nmap <nmap_args>`: Run an Nmap scan. For best results with `suggest`, use service version detection (`-sV`).
-  - *Example:* `nmap -sV 127.0.0.1`
-- `suggest`: Get exploit suggestions based on the last Nmap scan.
-- `help`: Display the help message.
-- `exit`: Close the framework.
-
-### Exploit Context Commands
-
-After selecting an exploit with `use <ID>`, the following commands become available:
-
-- `info`: Show detailed information about the active exploit.
-- `content`: Display the full source code/content of the exploit.
-- `save <filename>`: Save the exploit's content to a new file.
-  - *Example:* `save my_exploit.py`
-- `back`: Exit from the current exploit context and return to the main menu.
-
-## Development
-
-If you want to run the application from the source code without installing it, you can use the following command:
+Search by keyword:
 
 ```bash
-go run main.go
+montana -q "apache rce"
 ```
+
+You can also pass the query directly:
+
+```bash
+montana wordpress 5.2
+```
+
+Search by CVE:
+
+```bash
+montana -cve CVE-2021-41773
+```
+
+Filter by platform and category:
+
+```bash
+montana -platform linux -category remote -q openssh
+```
+
+Show a single record:
+
+```bash
+montana -id 33814
+```
+
+Use a custom index file:
+
+```bash
+montana -index /path/to/index.json -q nginx
+```
+
+Or set:
+
+```bash
+export MONTANA_INDEX=/path/to/index.json
+```
+
+## Data Model
+
+`index.json` is expected to contain an array of records:
+
+```json
+[
+  {
+    "exploit_id": 33814,
+    "date": "01/01/2020",
+    "category": "remote",
+    "platform": "linux",
+    "author": "researcher",
+    "cve": ["CVE-0000-0000"],
+    "title": "Example product remote issue",
+    "original_link": "https://example.com/source"
+  }
+]
+```
+
+## Safety Notes
+
+Montana is a search and indexing utility. It does not include exploit source code and does not execute external security tools.
+
+Use the metadata only for authorized security research, lab work, patch verification, and defensive triage.
+
+## License
+
+See [LICENSE](LICENSE).

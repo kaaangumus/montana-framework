@@ -1,24 +1,17 @@
-#!/bin/bash
+#!/bin/sh
+set -eu
 
-# Create directories
-INSTALL_DIR="/usr/local/share/montana-framework"
+INSTALL_DIR="/usr/local/share/montana"
 BIN_DIR="/usr/local/bin"
 
-echo "Creating directories..."
-mkdir -p $INSTALL_DIR
-mkdir -p $BIN_DIR
+echo "Building montana..."
+go build -o montana .
 
-# Build the application
-echo "Building montana-framework..."
-go build -o montana-framework .
+echo "Installing binary to $BIN_DIR/montana..."
+install -m 0755 montana "$BIN_DIR/montana"
 
-# Install the binary
-echo "Installing montana-framework binary to $BIN_DIR..."
-cp montana-framework $BIN_DIR
+echo "Installing metadata index to $INSTALL_DIR/index.json..."
+mkdir -p "$INSTALL_DIR"
+install -m 0644 index.json "$INSTALL_DIR/index.json"
 
-# Install data files
-echo "Installing data files to $INSTALL_DIR..."
-cp -r exploits $INSTALL_DIR
-cp index.json $INSTALL_DIR
-
-echo "Installation complete. You can now run 'montana-framework' from your terminal."
+echo "Installation complete. Run: montana -q \"wordpress rce\""
