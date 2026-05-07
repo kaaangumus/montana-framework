@@ -1,14 +1,14 @@
 # Montana
 
-Montana is a local exploit metadata search tool inspired by `searchsploit`.
+Montana is a local exploit search tool inspired by `searchsploit`.
 
-It searches `index.json` and prints matching exploit records. It does not ship exploit source files, payloads, or proof-of-concept code.
+It searches `index.json` and prints matching exploit records. The repository also keeps a local `exploits/` archive for offline reference, but the CLI does not execute, copy, export, or open exploit code.
 
 ## Why This Changed
 
-Older versions bundled an `exploits/` directory with thousands of exploit files. That made the repository heavy and could trigger antivirus products such as Windows Defender as HackTool or malware content.
+The interactive framework behavior was removed. Montana no longer opens shells, runs Nmap, suggests exploit execution paths, or copies exploit files into the working directory.
 
-The current version keeps only searchable metadata:
+The current CLI searches metadata:
 
 - ID
 - Title
@@ -19,6 +19,8 @@ The current version keeps only searchable metadata:
 - Date
 - Original source link
 
+The `exploits/` directory is kept as an offline archive. Because that directory contains proof-of-concept exploit text, antivirus products such as Windows Defender may still flag or quarantine files from the archive.
+
 ## Features
 
 - Fast local search over `index.json`
@@ -26,7 +28,6 @@ The current version keeps only searchable metadata:
 - CVE search
 - Platform and category filters
 - Detail view by exploit ID
-- No bundled exploit code
 - No shell mode
 - No exploit export or copy feature
 
@@ -122,7 +123,7 @@ export MONTANA_INDEX=/path/to/index.json
 
 ## Safety Notes
 
-Montana is a search and indexing utility. It does not include exploit source code and does not execute external security tools.
+Montana is a search and indexing utility. It does not execute exploit source code and does not execute external security tools.
 
 Use the metadata only for authorized security research, lab work, patch verification, and defensive triage.
 
