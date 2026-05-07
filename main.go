@@ -25,6 +25,7 @@ type Exploit struct {
 
 type options struct {
 	indexPath string
+	dataDir   string
 	query     string
 	cve       string
 	category  string
@@ -44,7 +45,7 @@ func main() {
 
 	switch {
 	case opts.id > 0:
-		printByID(db, opts.id)
+		printByID(db, opts.id, opts.dataDir)
 	case opts.cve != "":
 		printResults(filter(db, []string{opts.cve}, opts), opts.limit)
 	case opts.query != "":
@@ -59,6 +60,7 @@ func main() {
 func parseFlags() options {
 	var opts options
 	flag.StringVar(&opts.indexPath, "index", defaultIndexPath(), "path to index.json")
+	flag.StringVar(&opts.dataDir, "data-dir", defaultDataDir(), "path to Montana data directory")
 	flag.StringVar(&opts.query, "q", "", "search query, for example: wordpress rce")
 	flag.StringVar(&opts.cve, "cve", "", "search by CVE, for example: CVE-2021-41773")
 	flag.StringVar(&opts.category, "category", "", "filter by category")
@@ -72,6 +74,19 @@ func parseFlags() options {
 	}
 
 	return opts
+}
+
+func defaultDataDir() string {
+	if envPath := os.Getenv("MONTANA_DATA"); envPath != "" {
+		return envPath
+	}
+
+	sharePath := filepath.Join("/usr/local/share", "montana")
+	if fileExists(sharePath) {
+		return sharePath
+	}
+
+	return "."
 }
 
 func defaultIndexPath() string {
@@ -162,10 +177,10 @@ func containsFold(value, term string) bool {
 	return strings.Contains(strings.ToLower(value), strings.ToLower(term))
 }
 
-func printByID(db []Exploit, id int) {
+func printByID(db []Exploit, id int, dataDir string) {
 	for _, item := range db {
 		if item.ID == id {
-			printDetail(item)
+			printDetail(item, dataDir)
 			return
 		}
 	}
@@ -208,7 +223,7 @@ func printResults(results []Exploit, limit int) {
 	}
 }
 
-func printDetail(item Exploit) {
+func printDetail(item Exploit, dataDir string) {
 	fmt.Printf("ID:       %d\n", item.ID)
 	fmt.Printf("Date:     %s\n", emptyDash(item.Date))
 	fmt.Printf("Title:    %s\n", emptyDash(item.Title))
@@ -217,6 +232,7 @@ func printDetail(item Exploit) {
 	fmt.Printf("Author:   %s\n", emptyDash(item.Author))
 	fmt.Printf("CVE:      %s\n", emptyDash(strings.Join(item.CVE, ", ")))
 	fmt.Printf("Source:   %s\n", emptyDash(item.OriginalLink))
+	fmt.Printf("Path:     %s\n", exploitPath(dataDir, item))
 }
 
 func emptyDash(value string) string {
@@ -224,6 +240,13 @@ func emptyDash(value string) string {
 		return "-"
 	}
 	return value
+}
+
+func exploitPath(dataDir string, item Exploit) string {
+	if item.Category == "" || item.ID <= 0 {
+		return "-"
+	}
+	return filepath.Join(dataDir, "exploits", item.Category, fmt.Sprintf("%d.txt", item.ID))
 }
 
 func printUsage() {

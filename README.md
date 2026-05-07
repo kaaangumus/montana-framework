@@ -98,6 +98,12 @@ Show a single record:
 montana -id 33814
 ```
 
+The detail view includes the local archive path, for example:
+
+```text
+Path: /usr/local/share/montana/exploits/web-applications/33814.txt
+```
+
 Use a custom index file:
 
 ```bash
@@ -108,6 +114,12 @@ Or set:
 
 ```bash
 export MONTANA_INDEX=/path/to/index.json
+```
+
+For a custom exploit archive location:
+
+```bash
+export MONTANA_DATA=/path/to/montana-data
 ```
 
 ## Data Model
