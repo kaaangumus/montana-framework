@@ -49,14 +49,22 @@ Run from the repository:
 ./montana -q "wordpress rce"
 ```
 
-Install on Linux:
+Install on Kali/Linux:
 
 ```bash
 chmod +x install.sh
 sudo ./install.sh
 ```
 
-The installer copies the binary to `/usr/local/bin/montana` and `index.json` to `/usr/local/share/montana/index.json`.
+The installer performs a full local installation:
+
+```text
+/usr/local/bin/montana
+/usr/local/share/montana/index.json
+/usr/local/share/montana/exploits/
+```
+
+The CLI searches metadata from `index.json`; the exploit archive is installed for offline reference.
 
 ## Usage
 
