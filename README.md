@@ -1,57 +1,60 @@
 # Montana
 
-Montana is a local exploit search tool inspired by `searchsploit`.
+Montana is a Kali/Linux-focused local exploit search tool inspired by `searchsploit`.
 
-It searches `index.json` and prints matching exploit records. The repository also keeps a local `exploits/` archive for offline reference, but the CLI does not execute, copy, export, or open exploit code.
+It searches exploit metadata from `index.json` and shows matching records with useful fields such as ID, title, CVE, platform, category, author, source link, and local archive path. The repository includes an offline `exploits/` archive, but the CLI does not execute exploit code, open shells, run scanners, or copy exploit files into the working directory.
 
-## Why This Changed
+## Purpose
 
-The interactive framework behavior was removed. Montana no longer opens shells, runs Nmap, suggests exploit execution paths, or copies exploit files into the working directory.
+Montana is designed for fast local lookup during authorized security research, lab work, patch verification, and defensive triage.
 
-The current CLI searches metadata:
+It is intentionally simple:
 
-- ID
-- Title
-- CVE
-- Platform
-- Category
-- Author
-- Date
-- Original source link
+- Search exploit metadata
+- Find records by keyword, CVE, platform, category, or ID
+- Show the local archive path for a matching exploit
+- Keep the exploit archive available offline
 
-The `exploits/` directory is kept as an offline archive. Because that directory contains proof-of-concept exploit text, antivirus products such as Windows Defender may still flag or quarantine files from the archive.
+## What It Does Not Do
 
-## Features
+Montana is not an exploitation framework.
 
-- Fast local search over `index.json`
-- Keyword search
-- CVE search
-- Platform and category filters
-- Detail view by exploit ID
-- No shell mode
-- No exploit export or copy feature
+- It does not run exploits.
+- It does not open an OS shell.
+- It does not run Nmap or external scanners.
+- It does not auto-select or recommend exploit execution.
+- It does not copy/export exploit code through the CLI.
+
+## Repository Contents
+
+```text
+main.go       CLI source code
+index.json    Exploit metadata index
+exploits/     Offline exploit text archive
+install.sh    Kali/Linux installer
+LICENSE       License file
+```
+
+Current archive size:
+
+```text
+index records: 39408
+exploit files: 39408
+```
 
 ## Installation
 
 Requirements:
 
+- Kali Linux or another Linux distribution
 - Go 1.20+
+- `sudo` for system-wide installation
 
-Build locally:
-
-```bash
-go build -o montana .
-```
-
-Run from the repository:
+Install:
 
 ```bash
-./montana -q "wordpress rce"
-```
-
-Install on Kali/Linux:
-
-```bash
+git clone https://github.com/kaaangumus/montana-framework.git
+cd montana-framework
 chmod +x install.sh
 sudo ./install.sh
 ```
@@ -64,7 +67,12 @@ The installer performs a full local installation:
 /usr/local/share/montana/exploits/
 ```
 
-The CLI searches metadata from `index.json`; the exploit archive is installed for offline reference.
+## Build Without Installing
+
+```bash
+go build -o montana .
+./montana -q "wordpress rce"
+```
 
 ## Usage
 
@@ -74,7 +82,7 @@ Search by keyword:
 montana -q "apache rce"
 ```
 
-You can also pass the query directly:
+Search using plain arguments:
 
 ```bash
 montana wordpress 5.2
@@ -92,39 +100,63 @@ Filter by platform and category:
 montana -platform linux -category remote -q openssh
 ```
 
-Show a single record:
+Show a single record by exploit ID:
 
 ```bash
-montana -id 33814
+montana -id 36854
 ```
 
-The detail view includes the local archive path, for example:
+Example detail output:
 
 ```text
-Path: /usr/local/share/montana/exploits/web-applications/33814.txt
+ID:       36854
+Date:     10/06/2021
+Title:    Apache HTTP Server 2.4.49 - Path Traversal Vulnerability
+Platform: multiple
+Category: web-applications
+Author:   Lucas Souza
+CVE:      CVE-2021-41773
+Source:   https://0day.today/exploit/36854
+Path:     /usr/local/share/montana/exploits/web-applications/36854.txt
 ```
 
-Use a custom index file:
+Limit result count:
+
+```bash
+montana -q "wordpress" -limit 10
+```
+
+## Custom Paths
+
+Use a custom metadata index:
 
 ```bash
 montana -index /path/to/index.json -q nginx
 ```
 
-Or set:
+Or set an environment variable:
 
 ```bash
 export MONTANA_INDEX=/path/to/index.json
 ```
 
-For a custom exploit archive location:
+Use a custom Montana data directory for local archive paths:
 
 ```bash
 export MONTANA_DATA=/path/to/montana-data
+montana -id 36854
 ```
 
-## Data Model
+Expected custom data layout:
 
-`index.json` is expected to contain an array of records:
+```text
+/path/to/montana-data/index.json
+/path/to/montana-data/exploits/
+```
+
+## Data Format
+
+`index.json` contains an array of exploit metadata records:
 
 ```json
 [
@@ -141,11 +173,21 @@ export MONTANA_DATA=/path/to/montana-data
 ]
 ```
 
-## Safety Notes
+Montana maps records to local archive files using:
 
-Montana is a search and indexing utility. It does not execute exploit source code and does not execute external security tools.
+```text
+exploits/<category>/<exploit_id>.txt
+```
 
-Use the metadata only for authorized security research, lab work, patch verification, and defensive triage.
+## Antivirus Notice
+
+The `exploits/` directory contains proof-of-concept exploit text. Antivirus products, especially Windows Defender, may flag or quarantine files from the archive as HackTool, malware, or exploit content.
+
+This is expected for offline exploit archives. Montana itself is only a search utility and does not execute exploit code.
+
+## Legal Notice
+
+Use Montana only for education, authorized security research, controlled labs, patch verification, and defensive analysis. Do not use the archive or metadata to attack systems without explicit permission.
 
 ## License
 
