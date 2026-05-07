@@ -1,5 +1,7 @@
 # Montana
 
+![Montana CLI screenshot](assets/montana.png)
+
 Montana is a Kali/Linux-focused local exploit search tool inspired by `searchsploit`.
 
 It searches exploit metadata from `index.json` and shows matching records with useful fields such as ID, title, CVE, platform, category, author, source link, and local archive path. The repository includes an offline `exploits/` archive, but the CLI does not execute exploit code, open shells, run scanners, or copy exploit files into the working directory.
